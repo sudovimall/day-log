@@ -1,2 +1,2 @@
-pub mod server;
 mod journal;
+pub mod server;

@@ -28,7 +28,7 @@ pub async fn ensure_path(path: impl AsRef<Path>) -> Result<PathBuf, io::Error> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).await?;
     }
-    
+
     fs::create_dir_all(&path).await?;
     Ok(path)
 }
