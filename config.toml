@@ -1,0 +1,6 @@
+base_path = ".daylog"
+port = 9999
+
+[database]
+url = "sqlite://daylog.sqlite"
+
