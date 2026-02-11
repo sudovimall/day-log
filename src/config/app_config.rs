@@ -1,7 +1,7 @@
 use crate::util;
-use log::error;
 use serde::Deserialize;
 use std::fs;
+use tracing::error;
 
 fn default_base_path() -> String {
     ".daylog".to_string()
@@ -18,6 +18,12 @@ fn default_picture_path() -> String {
 fn default_media_path() -> String {
     "media".to_string()
 }
+fn default_index_path() -> String {
+    "dist/index.html".to_string()
+}
+fn default_static_path() -> String {
+    "dist/static".to_string()
+}
 #[derive(Debug, Clone, Deserialize)]
 pub struct AppConfig {
     #[serde(default = "default_base_path")]
@@ -30,6 +36,10 @@ pub struct AppConfig {
     pub picture_path: String,
     #[serde(default = "default_media_path")]
     pub media_path: String,
+    #[serde(default = "default_index_path")]
+    pub index_path: String,
+    #[serde(default = "default_static_path")]
+    pub static_path: String,
 }
 
 impl AppConfig {
@@ -68,5 +78,13 @@ impl AppConfig {
     }
     pub fn get_db_path(&self) -> String {
         (self.base_path.clone() + "/" + self.db_path.as_str()).replace("//", "/")
+    }
+
+    pub fn get_index_path(&self) -> String {
+        self.index_path.clone()
+    }
+
+    pub fn get_static_path(&self) -> String {
+        self.static_path.clone()
     }
 }
