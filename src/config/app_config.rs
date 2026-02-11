@@ -24,6 +24,9 @@ fn default_index_path() -> String {
 fn default_static_path() -> String {
     "dist/static".to_string()
 }
+fn default_auto_switch_port_time() -> i16 {
+    100
+}
 #[derive(Debug, Clone, Deserialize)]
 pub struct AppConfig {
     #[serde(default = "default_base_path")]
@@ -40,6 +43,8 @@ pub struct AppConfig {
     pub index_path: String,
     #[serde(default = "default_static_path")]
     pub static_path: String,
+    #[serde(default = "default_auto_switch_port_time")]
+    pub auto_switch_port_time: i16,
 }
 
 impl AppConfig {
@@ -86,5 +91,15 @@ impl AppConfig {
 
     pub fn get_static_path(&self) -> String {
         self.static_path.clone()
+    }
+
+    pub fn get_media_path(&self) -> String {
+        let path = self.base_path.clone() + "/" + self.media_path.as_str() + "/";
+        path.replace("//", "/")
+    }
+
+    pub fn get_picture_path(&self) -> String {
+        let path = self.base_path.clone() + "/" + self.picture_path.as_str() + "/";
+        path.replace("//", "/")
     }
 }
