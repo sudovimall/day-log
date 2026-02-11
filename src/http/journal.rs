@@ -1,7 +1,7 @@
 use crate::app_state::AppState;
 use crate::http::resp::{ApiCode, ApiResponse, ApiResult};
-use axum::extract::{Path, Query, State};
 use axum::Json;
+use axum::extract::{Path, Query, State};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -50,22 +50,22 @@ pub async fn create_journal(
     let result = sqlx::query(
         "insert into journal (content, date, create_time, update_time) values (?, ?, ?, ?)",
     )
-        .bind(req.content)
-        .bind(req.date)
-        .bind(ts)
-        .bind(ts)
-        .execute(&state.db)
-        .await
-        .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbInsertFailed, "db insert failed"))?;
+    .bind(req.content)
+    .bind(req.date)
+    .bind(ts)
+    .bind(ts)
+    .execute(&state.db)
+    .await
+    .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbInsertFailed, "db insert failed"))?;
 
     let id = result.last_insert_rowid();
     let journal = sqlx::query_as::<_, Journal>(
         "select id, content, date, create_time, update_time from journal where id = ?",
     )
-        .bind(id)
-        .fetch_one(&state.db)
-        .await
-        .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbQueryFailed, "db query failed"))?;
+    .bind(id)
+    .fetch_one(&state.db)
+    .await
+    .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbQueryFailed, "db query failed"))?;
 
     Ok(ApiResponse::ok(journal))
 }
@@ -101,18 +101,15 @@ pub async fn list_journals(
     Ok(ApiResponse::ok(journals))
 }
 
-pub async fn get_journal(
-    State(state): State<AppState>,
-    Path(id): Path<i64>,
-) -> ApiResult<Journal> {
+pub async fn get_journal(State(state): State<AppState>, Path(id): Path<i64>) -> ApiResult<Journal> {
     info!("获取日记 id: {}", id);
     let journal = sqlx::query_as::<_, Journal>(
         "select id, content, date, create_time, update_time from journal where id = ?",
     )
-        .bind(id)
-        .fetch_optional(&state.db)
-        .await
-        .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbGetFailed, "db query failed"))?;
+    .bind(id)
+    .fetch_optional(&state.db)
+    .await
+    .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbGetFailed, "db query failed"))?;
 
     match journal {
         Some(journal) => Ok(ApiResponse::ok(journal)),
@@ -151,18 +148,15 @@ pub async fn update_journal(
     let journal = sqlx::query_as::<_, Journal>(
         "select id, content, date, create_time, update_time from journal where id = ?",
     )
-        .bind(id)
-        .fetch_one(&state.db)
-        .await
-        .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbUpdateGetFailed, "db query failed"))?;
+    .bind(id)
+    .fetch_one(&state.db)
+    .await
+    .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbUpdateGetFailed, "db query failed"))?;
 
     Ok(ApiResponse::ok(journal))
 }
 
-pub async fn delete_journal(
-    State(state): State<AppState>,
-    Path(id): Path<i64>,
-) -> ApiResult<()> {
+pub async fn delete_journal(State(state): State<AppState>, Path(id): Path<i64>) -> ApiResult<()> {
     let result = sqlx::query("delete from journal where id = ?")
         .bind(id)
         .execute(&state.db)

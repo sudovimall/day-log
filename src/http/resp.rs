@@ -1,4 +1,4 @@
-use axum::{http::StatusCode, Json};
+use axum::{Json, http::StatusCode};
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
@@ -32,7 +32,7 @@ impl ApiCode {
 }
 
 pub type ApiResult<T> =
-Result<(StatusCode, Json<ApiResponse<T>>), (StatusCode, Json<ApiResponse<T>>)>;
+    Result<(StatusCode, Json<ApiResponse<T>>), (StatusCode, Json<ApiResponse<T>>)>;
 
 impl<T: Serialize> ApiResponse<T> {
     pub fn ok(data: T) -> (StatusCode, Json<ApiResponse<T>>) {

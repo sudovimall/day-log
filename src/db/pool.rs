@@ -17,8 +17,8 @@ pub async fn init(config: &AppConfig) -> Result<Pool<sqlx::Sqlite>, sqlx::Error>
         )
         "#,
     )
-        .execute(&pool)
-        .await?;
+    .execute(&pool)
+    .await?;
 
     sqlx::query(
         r#"
@@ -32,8 +32,8 @@ pub async fn init(config: &AppConfig) -> Result<Pool<sqlx::Sqlite>, sqlx::Error>
         )
         "#,
     )
-        .execute(&pool)
-        .await?;
+    .execute(&pool)
+    .await?;
 
     sqlx::query(
         r#"
@@ -54,8 +54,8 @@ pub async fn init(config: &AppConfig) -> Result<Pool<sqlx::Sqlite>, sqlx::Error>
         )
         "#,
     )
-        .execute(&pool)
-        .await?;
+    .execute(&pool)
+    .await?;
 
     Ok(pool)
 }
