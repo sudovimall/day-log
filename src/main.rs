@@ -5,7 +5,7 @@ mod http;
 mod util;
 
 use std::sync::Arc;
-use tracing::debug;
+use tracing::error;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
@@ -19,16 +19,29 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
     // 不配置 有default
-    let app_config = config::app_config::AppConfig::load_from_file("config.toml").unwrap();
-    debug!("config: {:?}", app_config);
+    let app_config = match config::app_config::AppConfig::load_from_file("config.toml") {
+        Ok(cfg) => cfg,
+        Err(e) => {
+            error!("读取配置失败: {}", e);
+            return;
+        }
+    };
     app_config.init().await;
 
-    let pool = db::init(&app_config).await.unwrap();
+    let pool = match db::init(&app_config).await {
+        Ok(pool) => pool,
+        Err(e) => {
+            error!("初始化数据库失败: {}", e);
+            return;
+        }
+    };
 
     let state = app_state::AppState {
         db: pool,
         config: Arc::new(app_config),
     };
 
-    let _ = http::server::run(state).await;
+    if let Err(e) = http::server::run(state).await {
+        error!("服务启动失败: {}", e);
+    }
 }
