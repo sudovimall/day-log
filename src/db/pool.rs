@@ -57,5 +57,26 @@ pub async fn init(config: &AppConfig) -> Result<Pool<sqlx::Sqlite>, sqlx::Error>
     .execute(&pool)
     .await?;
 
+    sqlx::query(
+        r#"
+        create table if not exists file_blob (
+            id integer primary key autoincrement,
+            kind text not null,
+            algo text not null,
+            oid text not null,
+            mime text not null,
+            size integer not null,
+            original_name text not null,
+            uri text not null,
+            file_path text not null,
+            create_time integer not null,
+            update_time integer not null,
+            unique (kind, algo, oid)
+        )
+        "#,
+    )
+    .execute(&pool)
+    .await?;
+
     Ok(pool)
 }

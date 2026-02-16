@@ -1,3 +1,4 @@
+use sha2::{Digest, Sha256};
 use std::io;
 use std::path::{Path, PathBuf};
 use tokio::fs;
@@ -31,4 +32,21 @@ pub async fn ensure_path(path: impl AsRef<Path>) -> Result<PathBuf, io::Error> {
 
     fs::create_dir_all(&path).await?;
     Ok(path)
+}
+
+pub async fn create_file(
+    path: impl AsRef<Path>,
+    content: impl AsRef<[u8]>,
+) -> Result<(), io::Error> {
+    let (file_path, _) = ensure_file_path(path).await?;
+    fs::write(file_path, content).await?;
+    Ok(())
+}
+
+pub fn file_hash(bytes: impl AsRef<[u8]>) -> String {
+    let mut hasher = Sha256::new();
+    Digest::update(&mut hasher, &bytes);
+    let result = hasher.finalize();
+    let result = format!("{:x}", result);
+    result
 }
