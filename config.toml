@@ -1,5 +1,11 @@
 base_path = ".daylog"
 port = 9999
+db_path = "db/daylog.sqlite"
+picture_path = "picture"
+media_path = "media"
+file_path = "file"
+upload_file_limit = 52428800
+auto_switch_port_time = 100
 
 [database]
 url = "sqlite://daylog.sqlite"
