@@ -20,12 +20,14 @@ pub struct Journal {
 pub struct CreateJournalReq {
     pub content: String,
     pub date: String,
+    pub auto_sync: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateJournalReq {
     pub content: Option<String>,
     pub date: Option<String>,
+    pub auto_sync: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -46,12 +48,42 @@ pub async fn create_journal(
     State(state): State<AppState>,
     Json(req): Json<CreateJournalReq>,
 ) -> ApiResult<Journal> {
+    let auto_sync = req.auto_sync.unwrap_or(false);
+    info!("创建/覆盖日记 date={}, auto_sync={}", req.date, auto_sync);
     let ts = now_ts();
+    let existed = sqlx::query_scalar::<_, i64>("select id from journal where date = ? limit 1")
+        .bind(&req.date)
+        .fetch_optional(&state.db)
+        .await
+        .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbQueryFailed, "db query failed"))?;
+
+    if let Some(id) = existed {
+        sqlx::query("update journal set content = ?, update_time = ? where id = ?")
+            .bind(&req.content)
+            .bind(ts)
+            .bind(id)
+            .execute(&state.db)
+            .await
+            .map_err(|_| {
+                ApiResponse::<Journal>::err(ApiCode::DbUpdateFailed, "db update failed")
+            })?;
+
+        let journal = sqlx::query_as::<_, Journal>(
+            "select id, content, date, create_time, update_time from journal where id = ?",
+        )
+        .bind(id)
+        .fetch_one(&state.db)
+        .await
+        .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbQueryFailed, "db query failed"))?;
+
+        return Ok(ApiResponse::ok(journal));
+    }
+
     let result = sqlx::query(
         "insert into journal (content, date, create_time, update_time) values (?, ?, ?, ?)",
     )
-    .bind(req.content)
-    .bind(req.date)
+    .bind(&req.content)
+    .bind(&req.date)
     .bind(ts)
     .bind(ts)
     .execute(&state.db)
@@ -79,14 +111,27 @@ pub async fn list_journals(
     info!("获取日记 page: {}, size: {}", page, size);
 
     let journals = if let Some(date) = query.date {
-        sqlx::query_as::<_, Journal>(
-            "select id, content, date, create_time, update_time from journal where date = ? order by id desc limit ? offset ?",
-        )
-            .bind(date)
-            .bind(size)
-            .bind((page - 1) * size)
-            .fetch_all(&state.db)
-            .await
+        let date = date.trim().to_string();
+        if date.len() == 7 {
+            let like = format!("{}-%", date);
+            sqlx::query_as::<_, Journal>(
+                "select id, content, date, create_time, update_time from journal where date like ? order by date asc, id asc limit ? offset ?",
+            )
+                .bind(like)
+                .bind(size)
+                .bind((page - 1) * size)
+                .fetch_all(&state.db)
+                .await
+        } else {
+            sqlx::query_as::<_, Journal>(
+                "select id, content, date, create_time, update_time from journal where date = ? order by id desc limit ? offset ?",
+            )
+                .bind(date)
+                .bind(size)
+                .bind((page - 1) * size)
+                .fetch_all(&state.db)
+                .await
+        }
     } else {
         sqlx::query_as::<_, Journal>(
             "select id, content, date, create_time, update_time from journal order by id  limit ? offset ?",
@@ -122,11 +167,30 @@ pub async fn update_journal(
     Path(id): Path<i64>,
     Json(req): Json<UpdateJournalReq>,
 ) -> ApiResult<Journal> {
+    let auto_sync = req.auto_sync.unwrap_or(false);
+    info!("更新日记 id={}, auto_sync={}", id, auto_sync);
     if req.content.is_none() && req.date.is_none() {
         return Err(ApiResponse::<Journal>::err(
             ApiCode::BadRequest,
             "content or date required",
         ));
+    }
+
+    if let Some(date) = req.date.as_ref() {
+        let conflict = sqlx::query_scalar::<_, i64>(
+            "select id from journal where date = ? and id <> ? limit 1",
+        )
+        .bind(date)
+        .bind(id)
+        .fetch_optional(&state.db)
+        .await
+        .map_err(|_| ApiResponse::<Journal>::err(ApiCode::DbQueryFailed, "db query failed"))?;
+        if conflict.is_some() {
+            return Err(ApiResponse::<Journal>::err(
+                ApiCode::BadRequest,
+                "date already exists, one day only one journal",
+            ));
+        }
     }
 
     let ts = now_ts();
