@@ -39,10 +39,62 @@
                 <button id="update-btn" type="button" class="ghost" disabled>保存修改</button>
                 <button id="delete-btn" type="button" class="danger" disabled>删除</button>
             </div>
+            <label class="sync-on-save">
+                <input id="sync-on-save" type="checkbox">
+                <span>保存修改后自动同步仓库</span>
+            </label>
 
             <div class="upload-row">
                 <input id="upload-input" type="file">
                 <button id="upload-btn" type="button" class="ghost">上传并插入</button>
+            </div>
+
+            <div class="import-box">
+                <div class="panel-title">压缩包导入</div>
+                <div class="import-row">
+                    <input id="import-zip-input" type="file" accept=".zip,application/zip">
+                    <select id="import-pattern-preset">
+                        <option value="default">默认多格式</option>
+                        <option value="ymd">{yyyy}/{MM}/{dd}.md</option>
+                        <option value="ymd_dash">{yyyy}/{MM-dd}.md</option>
+                        <option value="year_mix">{yyyy}/{yyyy}_{MM}/{d}.md</option>
+                        <option value="custom">只用自定义</option>
+                    </select>
+                    <button id="import-btn" type="button" class="ghost">导入压缩包</button>
+                </div>
+                <textarea
+                        id="import-patterns"
+                        rows="4"
+                        placeholder="可自定义模板，每行一个，例如：&#10;{yyyy}/{MM}/{dd}.md&#10;{yyyy}/{MM-dd}.md"></textarea>
+                <label class="field">
+                    <span>Git Markdown 输出路径模板</span>
+                    <input id="sync-output-path" type="text" placeholder="journals/{yyyy}/{MM}-{dd}/{d}.md">
+                </label>
+                <label class="field">
+                    <span>Git Commit 模板</span>
+                    <input id="sync-commit-message" type="text" placeholder="sync {date} count={count} ts={timestamp}">
+                </label>
+                <div class="field">
+                    <span>日期占位符配置（同步与导入共用）</span>
+                    <div class="placeholder-grid">
+                        <label><span>yyyy</span><input id="ph-yyyy" type="text" placeholder="{yyyy}"></label>
+                        <label><span>MM</span><input id="ph-mm" type="text" placeholder="{MM}"></label>
+                        <label><span>M</span><input id="ph-m" type="text" placeholder="{M}"></label>
+                        <label><span>dd</span><input id="ph-dd" type="text" placeholder="{dd}"></label>
+                        <label><span>d</span><input id="ph-d" type="text" placeholder="{d}"></label>
+                        <label><span>date</span><input id="ph-date" type="text" placeholder="{date}"></label>
+                        <label><span>timestamp</span><input id="ph-timestamp" type="text"
+                                                            placeholder="{timestamp}"></label>
+                        <label><span>count</span><input id="ph-count" type="text" placeholder="{count}"></label>
+                    </div>
+                </div>
+                <div class="import-row">
+                    <button id="load-settings-btn" type="button" class="ghost">加载持久化配置</button>
+                    <button id="save-settings-btn" type="button" class="ghost">保存持久化配置</button>
+                </div>
+                <p class="tips">后端按模板从 zip 内 markdown 路径提取日期，再写入日记。</p>
+                <div id="import-pattern-help" class="pattern-help"></div>
+                <pre id="import-result" class="import-result">等待导入...</pre>
             </div>
 
             <p class="tips">图片将插入为 <code>![]()</code>，其它文件插入为 <code>[]()</code>。</p>
@@ -52,6 +104,20 @@
 
         <article class="panel list-panel">
             <div class="panel-title">日记列表</div>
+            <div class="month-box">
+                <div class="month-head">
+                    <label class="field">
+                        <span>按月份查询</span>
+                        <input id="month-input" type="month">
+                    </label>
+                    <button id="month-search-btn" type="button" class="ghost">查询月份</button>
+                </div>
+                <div class="month-weekdays">
+                    <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+                </div>
+                <div id="month-grid" class="month-grid"></div>
+                <p class="tips">绿色表示已有日记，点击空白日期可直接新增该天日记。</p>
+            </div>
 
             <div class="filters">
                 <input id="filter-date" type="date">

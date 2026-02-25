@@ -160,6 +160,7 @@ button.danger:hover {
 
 .editor-actions,
 .upload-row,
+.import-row,
 .filters,
 .pager {
     display: flex;
@@ -171,12 +172,179 @@ button.danger:hover {
     align-items: center;
 }
 
+.sync-on-save {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.sync-on-save input {
+    width: auto;
+}
+
 .upload-row input {
     flex: 1;
 }
 
+.import-box {
+    margin-top: 12px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #f9fdfa;
+}
+
+.import-box .panel-title {
+    margin-bottom: 8px;
+}
+
+.import-row {
+    align-items: center;
+}
+
+.import-row input {
+    flex: 1;
+}
+
+#import-patterns {
+    margin-top: 8px;
+    min-height: 88px;
+}
+
+.placeholder-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.placeholder-grid label {
+    display: grid;
+    gap: 4px;
+}
+
+.placeholder-grid label span {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.pattern-help {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.import-result {
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #0f172a;
+    color: #e2e8f0;
+    font-size: 12px;
+    line-height: 1.45;
+    max-height: 220px;
+    overflow: auto;
+}
+
 .filters {
     margin-bottom: 10px;
+}
+
+.month-box {
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #f9fdfa;
+}
+
+.month-head {
+    display: flex;
+    gap: 8px;
+    align-items: end;
+}
+
+.month-head .field {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.month-weekdays {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+.month-grid {
+    margin-top: 6px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.month-day {
+    min-height: 58px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text);
+    display: grid;
+    align-content: space-between;
+    justify-items: start;
+}
+
+.month-day .n {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.month-day .s {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.month-day.empty {
+    background: #ffffff;
+}
+
+.month-day.has-entry {
+    background: #dff2e8;
+    border-color: #afd9c5;
+}
+
+.month-day:hover {
+    background: #eef7f2;
+}
+
+.month-day.has-entry:hover {
+    background: #d2ecdf;
+}
+
+.month-day.today {
+    outline: 2px solid #96c2ff;
+    outline-offset: 1px;
+}
+
+.month-day.active {
+    border-color: #1b7f5e;
+    box-shadow: 0 0 0 2px rgba(27, 127, 94, 0.16);
+}
+
+.month-day.blank {
+    min-height: 58px;
+    border: 1px dashed #dbe7e2;
+    background: transparent;
+    pointer-events: none;
 }
 
 .journal-list {
@@ -323,8 +491,14 @@ button.danger:hover {
 }
 
 @media (max-width: 600px) {
+    .placeholder-grid {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+    }
+
     .editor-actions,
     .upload-row,
+    .import-row,
+    .month-head,
     .filters,
     .pager,
     .top-actions {
