@@ -23,6 +23,7 @@ pub enum ApiCode {
     DbDeleteFailed = 1007,
     FileMissing = 2001,
     FileWriteFailed = 2002,
+    SyncFailed = 3001,
 }
 
 impl ApiCode {

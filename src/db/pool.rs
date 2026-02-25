@@ -78,5 +78,17 @@ pub async fn init(config: &AppConfig) -> Result<Pool<sqlx::Sqlite>, sqlx::Error>
     .execute(&pool)
     .await?;
 
+    sqlx::query(
+        r#"
+        create table if not exists app_setting (
+            key text primary key,
+            value text not null,
+            update_time integer not null
+        )
+        "#,
+    )
+    .execute(&pool)
+    .await?;
+
     Ok(pool)
 }
