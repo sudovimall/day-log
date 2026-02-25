@@ -7,6 +7,25 @@ file_path = "file"
 upload_file_limit = 52428800
 auto_switch_port_time = 100
 
-[database]
-url = "sqlite://daylog.sqlite"
-
+[sync]
+enabled = true
+repo_url = ""
+branch = "master"
+username = ""
+password = ""
+auth_method = "ssh" # auto/password/ssh
+ssh_username = "git"
+ssh_private_key_path = "~/.ssh/id_ed25519" # 例如: ~/.ssh/id_ed25519
+ssh_public_key_path = ""  # 可选
+ssh_passphrase = ""       # 私钥有口令时填写
+author_name = ""
+author_email = ""
+commit_message = "{yyyy}_{MM}_{dd}"
+output_format = "markdown"
+output_path = "{yyyy}/{MM}-{dd}/{d}.md"
+repo_local_path = "sync-repo"
+import_patterns = [
+  "{yyyy}/{yyyy}_{MM}/{d}.md",
+  "{yyyy}/{yyyy}_{MM}/{dd}.md",
+  "{date}.md",
+]
