@@ -581,7 +581,7 @@
             const text = [
                 `可解析占位符: ${placeholders.yyyy} ${placeholders.mm}/${placeholders.m} ${placeholders.dd}/${placeholders.d} ${placeholders.date}`,
                 "{date} 支持: yyyy-MM-dd, yyyy_MM_dd, yyyy.MM.dd, yyyyMMdd, yyyy-M-d",
-                `Git Commit占位符: ${placeholders.yyyy} ${placeholders.mm} ${placeholders.m} ${placeholders.dd} ${placeholders.d} ${placeholders.date} ${placeholders.timestamp} ${placeholders.count}`,
+                `Git Commit占位符: ${placeholders.yyyy} ${placeholders.mm} ${placeholders.m} ${placeholders.dd} ${placeholders.d} ${placeholders.date} ${placeholders.timestamp} ${placeholders.count} {journal_dd} {journal_d}`,
                 "当前模板示例:",
                 ...examples,
             ].join("\n");
@@ -832,7 +832,7 @@
         el.monthInput.value = state.month;
         fillPresetPatterns();
         el.syncOutputPath.value = `journals/${DEFAULT_DATE_PLACEHOLDERS.yyyy}/${DEFAULT_DATE_PLACEHOLDERS.mm}-${DEFAULT_DATE_PLACEHOLDERS.dd}/${DEFAULT_DATE_PLACEHOLDERS.d}.md`;
-        el.syncCommitMessage.value = `sync ${DEFAULT_DATE_PLACEHOLDERS.date} count=${DEFAULT_DATE_PLACEHOLDERS.count} ts=${DEFAULT_DATE_PLACEHOLDERS.timestamp}`;
+        el.syncCommitMessage.value = `sync ${DEFAULT_DATE_PLACEHOLDERS.date} jd={journal_dd}/{journal_d} count=${DEFAULT_DATE_PLACEHOLDERS.count} ts=${DEFAULT_DATE_PLACEHOLDERS.timestamp}`;
         renderPatternHelp();
         renderImportResult(null);
         renderPreview();
