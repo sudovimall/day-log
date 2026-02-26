@@ -617,8 +617,12 @@ pub async fn sync_journal(State(state): State<AppState>) -> ApiResult<SyncResp> 
         &date_placeholders,
     )
     .map_err(|msg| ApiResponse::<SyncResp>::err(ApiCode::BadRequest, &msg))?;
-    let commit_message =
-        resolve_commit_message(&sync_commit_template, journals.len(), &date_placeholders);
+    let commit_message = resolve_commit_message(
+        &sync_commit_template,
+        journals.len(),
+        &journals,
+        &date_placeholders,
+    );
     let repo_path = PathBuf::from(state.config.get_sync_repo_path());
     info!(
         "journal sync prepared: repo_path={}, output_files={}, commit_message={}",
@@ -704,11 +708,7 @@ fn render_journals(format: &str, journals: &[JournalRow]) -> Result<String, Stri
 }
 
 fn render_single_markdown(j: &JournalRow) -> String {
-    let mut out = String::new();
-    out.push_str(&format!("# {}\n\n", j.date));
-    out.push_str(&j.content);
-    out.push('\n');
-    out
+    j.content.clone()
 }
 
 fn build_output_files(
@@ -805,12 +805,19 @@ fn resolve_output_path_template(
     Ok(out)
 }
 
-fn resolve_commit_message(template: &str, count: usize, placeholders: &DatePlaceholders) -> String {
+fn resolve_commit_message(
+    template: &str,
+    count: usize,
+    journals: &[JournalRow],
+    placeholders: &DatePlaceholders,
+) -> String {
     let ts = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(0);
     let (yyyy, mm, dd, m, d, date) = now_date_tokens();
+    let (journal_dd, journal_d) =
+        latest_journal_day_tokens(journals).unwrap_or((dd.clone(), d.clone()));
     template
         .replace(&placeholders.timestamp, &ts.to_string())
         .replace(&placeholders.count, &count.to_string())
@@ -820,6 +827,21 @@ fn resolve_commit_message(template: &str, count: usize, placeholders: &DatePlace
         .replace(&placeholders.dd, &dd)
         .replace(&placeholders.d, &d)
         .replace(&placeholders.date, &date)
+        .replace("{journal_dd}", &journal_dd)
+        .replace("{journal_d}", &journal_d)
+}
+
+fn latest_journal_day_tokens(journals: &[JournalRow]) -> Option<(String, String)> {
+    let date = journals.last()?.date.trim();
+    let mut parts = date.split('-');
+    let _yyyy = parts.next()?;
+    let _mm = parts.next()?;
+    let dd = parts.next()?;
+    if parts.next().is_some() || dd.len() != 2 || !dd.chars().all(|c| c.is_ascii_digit()) {
+        return None;
+    }
+    let d_plain = dd.parse::<u32>().ok()?.to_string();
+    Some((dd.to_string(), d_plain))
 }
 
 fn now_date_tokens() -> (String, String, String, String, String, String) {
